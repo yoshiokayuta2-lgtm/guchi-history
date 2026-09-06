@@ -1,96 +1,65 @@
-# GUCHIの歴史添削隊 v5
+# GUCHIの歴史添削隊 v6
 
-日本史・世界史の論述を、
+日本史・世界史の記述添削を、先生と少人数の生徒で共有運用するためのGitHub Pages向けWebアプリです。
 
-**先生：PDF出題 → 生徒：手書き写真提出 → AI文字起こし → 生徒微調整 → 先生添削 → 返却**
+## 現在の状態
 
-で回す少人数向けWebアプリです。
+- Supabase共有モード：接続設定済み
+- 先生ログイン：Supabase Auth（メール＋パスワード）
+- 生徒ログイン：先生が登録した生徒名＋4桁コード
+- 生徒登録：先生画面から可能
+- 日本史 / 世界史：科目を明示して課題管理
+- PDF課題化：画面フロー実装済み。AI解析はAPI契約後に接続
+- 答案写真提出：実装済み
+- 手書き文字起こし：画面フロー実装済み。AI OCRはAPI契約後に接続
+- 先生添削・返却・書き直し：実装済み
+- Private Storage：答案画像 / 課題PDF用
 
-## v5でできること
+## GitHub Pagesへの公開
 
-- 日本史 / 世界史を色・ラベルで区別
-- 先生画面で生徒を登録
-- 生徒ごとに日本史 / 世界史 / 両方を設定
-- 生徒ログインコードを発行・再発行
-- PDFをアップして課題フォーム化（OpenAI API未接続時はデモ解析）
-- 生徒は手書き答案の写真をアップ
-- AI文字起こし → 生徒が誤読だけ修正（OpenAI API未接続時はデモ）
-- 先生が写真・文字起こし・確認後答案を見て添削
-- 返却後、生徒が書き直し提出
-- Supabase接続後は先生PC / 生徒スマホで共有運用
-- Supabase未設定なら同じブラウザ内のデモモード
+このZIPを展開し、中身をGitHubリポジトリのルートにアップロードします。
 
-## v5の変更点
-
-- ログイン画面のメイン画像が上で切れないように修正
-- GitHub Pages用に相対パスを整理
-- `.nojekyll` を追加
-- Supabase共有DBを実装
-- 先生：Supabase Auth（メール+パスワード）
-- 生徒：匿名Auth + 名前 + ログインコード
-- RLS（Row Level Security）を追加
-- 生徒の答案写真 / 先生のPDFをPrivate Storageに保存
-- `student-login` Edge Functionを同梱
-
-## GitHub Pagesへ上げるファイル
-
-このフォルダの中身をそのままリポジトリのルートへ置けます。
+必要ファイル：
 
 - `index.html`
 - `styles.css`
 - `app.js`
 - `config.js`
+- `favicon.svg`
 - `assets/`
 - `.nojekyll`
 
-Supabase用のファイルも一緒に置いて問題ありません。
+`supabase-schema.sql` と `supabase/` はバックアップ・再設定用なので、同じリポジトリに置いて問題ありません。
 
-- `supabase-schema.sql`
-- `supabase/functions/student-login/index.ts`
-- `supabase/config.toml`
-- `SUPABASE_SETUP.md`
+GitHubで `Settings` → `Pages` → `Deploy from a branch` → `main / root` を選べば公開できます。
 
-## 重要：公開してよいキー / いけないキー
+## セキュリティ
 
-`config.js` に入れてよいもの：
+`config.js` に入っているのは公開前提の Supabase Project URL と Publishable key だけです。
 
-- Supabase Project URL
-- Supabase Publishable key（公開用キー）
-
-絶対に入れないもの：
+次の値はGitHubへ絶対に入れないでください。
 
 - Supabase Secret key
-- legacy service_role key
+- `service_role` key
 - OpenAI API key
+- Database password
 
-## セットアップ順
+## Supabase側で済ませておく設定
 
-1. GitHub Pagesへ公開
-2. SupabaseでProject作成
-3. `supabase-schema.sql` を実行
-4. Anonymous Sign-InsをON
-5. 先生用Authユーザーを1人作成
-6. `student-login` Edge Functionをデプロイ
-7. `config.js` にProject URL / Publishable keyを入れる
-8. GitHubへ再アップロード
-9. 先生ログイン → 生徒登録 → 生徒スマホからログインテスト
+- `supabase-schema.sql` をSQL Editorで実行
+- Anonymous sign-ins：ON
+- 通常ユーザーのSign up：OFF推奨
+- 先生ユーザー：Dashboardから作成しAuto confirm
+- Edge Function `student-login`：Deploy
+- `Verify JWT with legacy secret`：OFF
 
-詳しくは `SUPABASE_SETUP.md` を参照してください。
+## 最初の実機テスト
 
-## OpenAI APIについて
+1. GitHub Pagesを開く
+2. 先生メール / パスワードでログイン
+3. 生徒管理で1人登録
+4. 4桁コードを確認
+5. 別端末またはシークレットウィンドウで生徒ログイン
+6. 課題の表示・提出・返却を確認
 
-OpenAI API契約前でも、Supabaseまで設定すれば以下は本運用できます。
-
-- 生徒登録
-- 課題作成・公開
-- PDF原本保存
-- 生徒答案写真保存
-- 提出
-- 先生添削
-- 返却
-- 書き直し
-
-API契約後に追加するのは主に次の2つです。
-
-1. PDF → 課題項目の自動解析
-2. 手書き答案写真 → 文字起こし
+AI機能を除く共有運用がここまで通れば基盤完成です。
