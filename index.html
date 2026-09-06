@@ -9,12 +9,63 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=6.1.0" />
 </head>
 <body>
   <div id="app"></div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
-  <script src="app.js"></script>
+  <script src="config.js?v=6.1.0"></script>
+  <script>
+    (function(){
+      const cdnCandidates = [
+        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
+        "https://unpkg.com/@supabase/supabase-js@2"
+      ];
+
+      function loadScript(src, timeoutMs = 9000){
+        return new Promise((resolve, reject) => {
+          const el = document.createElement("script");
+          let done = false;
+          const finish = (fn, value) => {
+            if(done) return;
+            done = true;
+            clearTimeout(timer);
+            fn(value);
+          };
+          const timer = setTimeout(() => finish(reject, new Error(`timeout: ${src}`)), timeoutMs);
+          el.src = src;
+          el.crossOrigin = "anonymous";
+          el.onload = () => finish(resolve, src);
+          el.onerror = () => finish(reject, new Error(`load failed: ${src}`));
+          document.head.appendChild(el);
+        });
+      }
+
+      async function boot(){
+        const attempts = [];
+        if(!(window.supabase && typeof window.supabase.createClient === "function")){
+          for(const src of cdnCandidates){
+            try{
+              await loadScript(src);
+              attempts.push({src, ok:true});
+              if(window.supabase && typeof window.supabase.createClient === "function") break;
+            }catch(err){
+              attempts.push({src, ok:false, message:String(err && err.message || err)});
+            }
+          }
+        }
+        window.__GUCHI_SUPABASE_SDK_STATUS = {
+          ready: Boolean(window.supabase && typeof window.supabase.createClient === "function"),
+          attempts
+        };
+        const app = document.createElement("script");
+        app.src = "app.js?v=6.1.0";
+        app.onerror = () => {
+          document.getElementById("app").innerHTML = '<div style="max-width:760px;margin:60px auto;font-family:sans-serif;padding:24px"><h2>アプリの読み込みに失敗しました</h2><p>ページを再読み込みしてください。改善しない場合はGitHub Pagesの反映状況を確認してください。</p></div>';
+        };
+        document.body.appendChild(app);
+      }
+      boot();
+    })();
+  </script>
 </body>
 </html>

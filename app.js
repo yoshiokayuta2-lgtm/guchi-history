@@ -1,7 +1,10 @@
 (() => {
   const CONFIG = window.HISTORY_APP_CONFIG || {};
   const SUPABASE_KEY = CONFIG.supabasePublishableKey || CONFIG.supabaseAnonKey || "";
-  const HAS_SUPABASE = Boolean(CONFIG.supabaseUrl && SUPABASE_KEY && window.supabase);
+  const CONFIG_HAS_SUPABASE = Boolean(CONFIG.supabaseUrl && SUPABASE_KEY);
+  const SDK_HAS_SUPABASE = Boolean(window.supabase && typeof window.supabase.createClient === "function");
+  const HAS_SUPABASE = Boolean(CONFIG_HAS_SUPABASE && SDK_HAS_SUPABASE);
+  const SDK_STATUS = window.__GUCHI_SUPABASE_SDK_STATUS || {};
   const db = HAS_SUPABASE ? window.supabase.createClient(CONFIG.supabaseUrl, SUPABASE_KEY) : null;
   const STORAGE_KEY = "guchi-history-writing-v5";
   const SESSION_KEY = "guchi-history-writing-v5-session";
@@ -489,7 +492,11 @@
             <img class="login-hero-image" src="assets/guchi-history-hero.webp" alt="GUCHIの歴史添削隊 日本史と世界史">
             <h1 style="font-size:30px">日本史・世界史の論述を、書いて伸ばす。</h1>
             <p class="muted">出題 → 手書き提出 → AI文字起こし → 先生添削 → 返却。少人数で軽く回せる歴史論述サイトです。</p>
-            <div class="notice info" style="margin:18px 0">${HAS_SUPABASE ? "Supabase共有モードです。先生・生徒が別端末から使えます。" : "現在はブラウザ内デモモードです。Supabase接続後に複数端末で共有できます。"}</div>
+            <div class="notice ${HAS_SUPABASE ? "info" : (CONFIG_HAS_SUPABASE ? "warn" : "info")}" style="margin:18px 0">${HAS_SUPABASE
+              ? "Supabase共有モードです。先生・生徒が別端末から使えます。"
+              : CONFIG_HAS_SUPABASE
+                ? `Supabaseの接続設定は入っていますが、ブラウザ側のSupabaseライブラリを読み込めませんでした。ページ再読み込みでも直らない場合はネットワーク側でCDNが遮断されている可能性があります。${SDK_STATUS.attempts?.length ? `（読み込み試行 ${SDK_STATUS.attempts.length}件）` : ""}`
+                : "現在はブラウザ内デモモードです。Supabase接続後に複数端末で共有できます。"}</div>
             <div class="grid two">
               <div class="role-card card" style="box-shadow:none">
                 <div class="icon role-symbol teacher-symbol">添</div>
@@ -518,7 +525,7 @@
                 <button class="btn" data-login-role="student">生徒として入る</button>
               </div>
             </div>
-            <div class="footer">GUCHIの歴史添削隊 / Japanese & World History Writing</div>
+            <div class="footer">GUCHIの歴史添削隊 v6.1 / Japanese & World History Writing</div>
           </div>
         </div>
       </div>`;

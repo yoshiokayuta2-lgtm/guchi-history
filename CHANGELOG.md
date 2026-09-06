@@ -1,3 +1,11 @@
+# v6.1
+
+- GitHub PagesでSupabase共有モードに切り替わらない場合の対策を追加
+- Supabase JSのCDN読み込みを jsDelivr → unpkg の順でフォールバック
+- config.js / app.js / styles.css にキャッシュバスターを追加
+- 「設定不足」と「SDK読み込み失敗」を画面上で区別して表示
+- フッターに v6.1 を表示し、公開版の判別を容易に
+
 # CHANGELOG
 
 ## v6
