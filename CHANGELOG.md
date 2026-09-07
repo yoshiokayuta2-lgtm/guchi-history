@@ -34,3 +34,9 @@
 - GitHub Pages公開向け構成へ整理
 - Supabase schema / Edge Function / setup guideを追加
 - メイン画像の上切れを修正
+
+
+## v6.2.2
+- 生徒ログインコード欄の見た目が他の入力欄と異なる問題を修正。
+- 型指定なしinputにも共通フォームスタイルを適用。
+- キャッシュ回避のため app/styles/config を v622 固定名に更新。
