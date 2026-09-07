@@ -1,4 +1,4 @@
--- GUCHIの歴史添削隊 v5
+-- GUCHIの歴史添削隊 v6.2
 -- GitHub Pages + Supabase 共有運用用
 --
 -- 役割
@@ -178,6 +178,14 @@ create policy "teacher full student secrets"
 on public.student_secrets for all to authenticated
 using (public.is_teacher())
 with check (public.is_teacher());
+
+
+-- Edge Function server-side privileges (student-login)
+grant usage on schema public to service_role;
+grant select on table public.students to service_role;
+grant select on table public.student_secrets to service_role;
+grant select, insert, update, delete on table public.student_devices to service_role;
+grant usage, select on sequence public.student_devices_id_seq to service_role;
 
 -- student_devices: teacher can inspect/delete. Edge Function creates mappings with server-side secret key.
  drop policy if exists "teacher full student devices" on public.student_devices;

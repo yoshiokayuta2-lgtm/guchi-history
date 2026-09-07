@@ -38,11 +38,13 @@ Authenticationの設定画面で：
 
 - `Allow anonymous sign-ins` → ON
 
-### 先生用：勝手な先生登録を防ぐ
+### 匿名生徒ログインに必要な設定
 
-- `Allow new users to sign up` → OFF 推奨
+- `Allow new users to sign up` → ON
+- `Allow anonymous sign-ins` → ON
 
-先生はDashboard側で作成します。
+匿名サインインもAuth上は新しいユーザー作成になるため、両方ONが必要です。
+先生アカウントはサイト側に新規登録画面を置かず、Dashboardから作成します。
 
 ## 4. 先生アカウントを作る
 
@@ -60,6 +62,7 @@ Authentication → Users から、先生本人のメールでユーザーを作�
 3. 名前を必ず `student-login` にする
 4. ZIP内の `supabase/functions/student-login/index.ts` の中身を貼り付ける
 5. Deploy
+6. Function Settingsで `Verify JWT with legacy secret` をOFF
 
 このFunctionは：
 
