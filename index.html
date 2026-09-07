@@ -9,11 +9,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles-v622.css" />
+  <link rel="stylesheet" href="styles-v630.css" />
 </head>
 <body>
   <div id="app"></div>
-  <script src="config-v622.js"></script>
+  <script src="config-v630.js"></script>
   <script>
     (function(){
       const cdnCandidates = [
@@ -41,6 +41,40 @@
       }
 
       async function boot(){
+        const pdfAttempts = [];
+        let pdfLoadedSrc = "";
+        const pdfCdnCandidates = [
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+          "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js",
+          "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"
+        ];
+        if(!(window.pdfjsLib && typeof window.pdfjsLib.getDocument === "function")){
+          for(const src of pdfCdnCandidates){
+            try{
+              await loadScript(src);
+              pdfAttempts.push({src, ok:true});
+              if(window.pdfjsLib && typeof window.pdfjsLib.getDocument === "function"){
+                pdfLoadedSrc = src;
+                break;
+              }
+            }catch(err){
+              pdfAttempts.push({src, ok:false, message:String(err && err.message || err)});
+            }
+          }
+        }
+        if(window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions){
+          const workerSrc = pdfLoadedSrc.includes("jsdelivr")
+            ? "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"
+            : pdfLoadedSrc.includes("unpkg")
+              ? "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js"
+              : "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
+        }
+        window.__GUCHI_PDFJS_STATUS = {
+          ready: Boolean(window.pdfjsLib && typeof window.pdfjsLib.getDocument === "function"),
+          attempts: pdfAttempts
+        };
+
         const attempts = [];
         if(!(window.supabase && typeof window.supabase.createClient === "function")){
           for(const src of cdnCandidates){
@@ -58,7 +92,7 @@
           attempts
         };
         const app = document.createElement("script");
-        app.src = "app-v622.js";
+        app.src = "app-v630.js";
         app.onerror = () => {
           document.getElementById("app").innerHTML = '<div style="max-width:760px;margin:60px auto;font-family:sans-serif;padding:24px"><h2>アプリの読み込みに失敗しました</h2><p>ページを再読み込みしてください。改善しない場合はGitHub Pagesの反映状況を確認してください。</p></div>';
         };
